@@ -19,7 +19,7 @@ import whisper
 from panns_inference import AudioTagging, labels as pann_labels
 import librosa
 import soundfile as sf
-from moviepy.editor import VideoFileClip, AudioFileClip, CompositeVideoClip
+from moviepy import VideoFileClip, AudioFileClip, CompositeVideoClip
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import threading
@@ -117,7 +117,7 @@ def extract_audio(video_path, audio_path):
         raise ValueError("No audio track found in the video.")
     clip.audio.write_audiofile(audio_path, logger=None)
     clip.reader.close()
-    clip.audio.reader.close_proc()
+    clip.audio.reader.close()
 
 def transcribe_audio(audio_file, language=None):
     waveform, sr = preprocess_audio(audio_file)
@@ -303,13 +303,13 @@ def process_video(video_path, sample_rate=1, draw_boxes=True, save_video=False, 
     # --- Video Properties ---
     clip = VideoFileClip(video_path)
     fps = clip.fps
-    frame_count = int(clip.reader.nframes)
+    frame_count = int(clip.reader.n_frames)
     duration = clip.duration
     width, height = clip.size
     video_format = os.path.splitext(video_path)[1].lower()
     clip.reader.close()
     if clip.audio is not None:
-        clip.audio.reader.close_proc()
+        clip.audio.reader.close()
 
     logging.info("Video properties: Duration: %s, Frames: %d, FPS: %.2f, Resolution: %dx%d, Format: %s",
                  seconds_to_timestr(duration), frame_count, fps, width, height, video_format)

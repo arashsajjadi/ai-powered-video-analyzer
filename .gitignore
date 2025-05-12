@@ -1,0 +1,11 @@
+.venv
+venv
+
+#contents
+annotated_temp.mp4
+audio_for_video.wav
+
+report.txt
+video_description.txt
+video_processing.log
+yolo11x.pt
