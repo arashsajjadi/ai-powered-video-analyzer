@@ -41,7 +41,7 @@ def test_pyproject_toml_valid():
     data = tomllib.loads((ROOT / "pyproject.toml").read_bytes().decode())
     assert "project" in data
     assert data["project"]["name"] == "ai-powered-video-analyzer"
-    assert data["project"]["version"] == "1.0.0"
+    assert data["project"]["version"] == "1.0.1"
 
 
 def test_pyproject_has_vision_extra():

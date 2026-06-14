@@ -7,6 +7,18 @@ This project uses [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.0.1] — 2026-06-14
+
+### Changed
+- **README Credits**: Removed Ultralytics/YOLO from the Credits section. Legacy YOLO backend is now noted in the Legacy CLI section only.
+- **README References**: Removed YOLO paper reference; YOLO is not a primary component.
+- **README Legacy CLI**: Added explicit note that `--backend legacy_yolo` with `[legacy-yolo]` extra is the preserved legacy path; not recommended for new use.
+
+### Removed
+- Stale v0.2/v0.3-era issue response replaced with a current v1.0.0 summary on GitHub issue #1.
+
+---
+
 ## [1.0.0] — 2026-06-14
 
 ### Added

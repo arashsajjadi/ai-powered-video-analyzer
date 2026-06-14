@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ai-powered-video-analyzer"
-version = "1.0.0"
+version = "1.0.1"
 description = "Offline, privacy-first AI video analysis: object detection, captioning, transcription, and LLM summarization."
 readme = "README.md"
 license = {text = "MIT"}

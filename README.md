@@ -303,6 +303,8 @@ python video_processing_gui.py
 ai-video-analyzer gui
 ```
 
+**Legacy optional backend**: The original YOLO-based detection path from `video_processing_gui.py` is available as `--backend legacy_yolo` with the `[legacy-yolo]` extra (`pip install -e ".[legacy-yolo]"`). This path is not recommended for new use. The default and supported detection backend is VisionServeX D-FINE.
+
 ---
 
 ## Pipeline architecture
@@ -363,7 +365,6 @@ ruff check .
 - [Salesforce BLIP](https://github.com/salesforce/BLIP) — Image captioning
 - [PANNs](https://github.com/qiuqiangkong/audioset_tagging_cnn) — Audio event detection
 - [Ollama](https://ollama.com) — Local LLM inference
-- [Ultralytics](https://github.com/ultralytics/ultralytics) — YOLO (available via `--backend legacy_yolo`)
 - **Dr. Mark Eramian** and the **Image Lab, Department of Computer Science, University of Saskatchewan** — research mentorship
 
 ---
@@ -374,7 +375,6 @@ ruff check .
 - Whisper: Radford et al. (2022). [arXiv:2212.04356](https://arxiv.org/abs/2212.04356)
 - BLIP: Li et al. (2022). [arXiv:2201.12086](https://arxiv.org/abs/2201.12086)
 - PANNs: Kong et al. (2020). IEEE/ACM TASLP.
-- YOLO: Khanam & Hussain (2024). [arXiv:2410.17725](https://arxiv.org/abs/2410.17725)
 
 ---
 

@@ -42,7 +42,7 @@ def test_cli_benchmark_help():
 def test_cli_version():
     result = _run("--version")
     assert result.returncode == 0
-    assert "1.0.0" in result.stdout
+    assert "1.0.1" in result.stdout
 
 
 def test_cli_analyze_has_preset():
