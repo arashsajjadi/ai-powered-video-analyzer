@@ -10,12 +10,16 @@ from ai_powered_video_analyzer.logging_utils import get_logger, timed_stage
 log = get_logger(__name__)
 
 _SUMMARY_PROMPT = (
-    "You are an expert video content summarizer. "
-    "Generate a cohesive, engaging, and concise narrative summary (less than 120 words) "
-    "of the video based on the following report. "
-    "Do not include timestamps, technical details, or model names. "
-    "Write in plain, natural language. "
-    "Focus on what actually happened in the video."
+    "You are an offline video analysis assistant summarizing structured detection data. "
+    "Based only on the data provided below, write a factual summary (under 150 words) of what the video shows. "
+    "Follow these rules:\n"
+    "- State only what the data explicitly supports.\n"
+    "- If timestamps are available, reference them (e.g. 'At 3.2s, a dog appears').\n"
+    "- Do not invent events, emotions, or context not present in the data.\n"
+    "- If the evidence is weak or ambiguous, say so explicitly.\n"
+    "- Do not mention model names, confidence scores, or technical details.\n"
+    "- Separate observed facts from plausible interpretations using 'Observed:' and 'Interpretation:' labels.\n"
+    "- If there is not enough evidence to summarize, respond with: 'Insufficient evidence for a meaningful summary.'"
 )
 
 
@@ -99,6 +103,7 @@ def _clean_report(text: str) -> str:
 
 def _fallback_summary() -> str:
     return (
-        "The video presents a dynamic scene with various events. "
-        "(Ollama summarization was unavailable; install and start Ollama for a full summary.)"
+        "LLM summarization unavailable. "
+        "Install and start Ollama to generate a natural-language summary: "
+        "https://ollama.com — then run `ollama serve` and `ollama pull phi4:latest`."
     )

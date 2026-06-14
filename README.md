@@ -9,27 +9,31 @@ Offline, privacy-first AI video analysis. Runs entirely on your local machine �
 
 ## What it does
 
-| Stage | Technology | Notes |
+Analyzes a video file through a local AI pipeline and produces structured outputs:
+
+| Stage | Technology | Default |
 |---|---|---|
-| Object detection | VisionServeX D-FINE (dfine-s default) | Primary backend; real-video benchmarked |
-| Scene captioning | BLIP (Salesforce) | Natural-language frame descriptions |
-| Speech transcription | Whisper (OpenAI) | Multilingual, offline |
-| Audio events | PANNs CNN14 | Requires CNN14 checkpoint |
-| LLM summarization | Ollama (any local model) | Fully offline |
-| Frame sampling | Built-in adaptive sampler | Scene-change and motion-aware |
+| Object detection | VisionServeX D-FINE | Required — primary backend |
+| Frame sampling | Built-in (adaptive/scene-change) | Enabled |
+| Scene captioning | BLIP (Salesforce) | Optional — needs `[full]` |
+| Speech transcription | Whisper (OpenAI) | Optional — needs `[full]` |
+| Audio events | PANNs CNN14 | Optional — needs `[full]` |
+| LLM summarization | Ollama (any local model) | Optional — needs Ollama |
+
+All processing is local. Nothing is sent to any server.
 
 ---
 
 ## Quick start
 
 ```bash
-# 1. Install
+# 1. Clone and install (detection only)
 git clone https://github.com/arashsajjadi/ai-powered-video-analyzer.git
 cd ai-powered-video-analyzer
 python -m pip install -U pip
 python -m pip install -e ".[vision]"
 
-# 2. Check dependencies
+# 2. Check your environment
 ai-video-analyzer doctor
 
 # 3. Analyze a video
@@ -40,21 +44,21 @@ ai-video-analyzer analyze "/path/to/video.mp4" --preset balanced
 
 ## Installation
 
-### Core install (detection only)
+### Detection only (recommended starting point)
 
 ```bash
 python -m pip install -e ".[vision]"
 ```
 
-This installs the frame sampler, VisionServeX D-FINE detection backend, and the CLI. No YOLO, no ultralytics, no cloud dependencies.
+Installs: frame sampler, VisionServeX D-FINE backend, CLI. No YOLO, no cloud dependencies.
 
-### Full install (all pipeline stages)
+### Full pipeline (all optional stages)
 
 ```bash
 python -m pip install -r pip_requirements.txt
 ```
 
-Includes: VisionServeX, Whisper, BLIP, PANNs, Ollama client, PyTorch, librosa.
+Adds: Whisper, BLIP, PANNs, PyTorch, librosa, Ollama client.
 
 ### Development
 
@@ -67,7 +71,7 @@ pytest -q
 
 ## External tools
 
-### ffmpeg — required for audio extraction
+### ffmpeg — required for audio stages
 
 ```bash
 # Ubuntu / Debian
@@ -83,32 +87,27 @@ brew install ffmpeg
 # Install
 curl -fsSL https://ollama.com/install.sh | sh
 
-# Pull a model
+# Start and pull a model
+ollama serve
 ollama pull phi4:latest
 ```
 
 ---
 
-## First analysis
+## First run
 
 ```bash
-ai-video-analyzer analyze "/path/to/video.mp4" --preset balanced
-```
+# Check that everything is installed
+ai-video-analyzer doctor
 
-**Fast test** (no transcription or summarization, 40 frames max):
-
-```bash
+# Run detection only (fast, no optional deps needed)
 ai-video-analyzer analyze "/path/to/video.mp4" \
-    --preset fast \
-    --max-frames 40 \
+    --preset balanced \
     --no-captioning \
     --no-audio-events \
     --no-summarization
-```
 
-**With all stages:**
-
-```bash
+# Full analysis (requires full install + Ollama)
 ai-video-analyzer analyze "/path/to/video.mp4" \
     --preset balanced \
     --whisper-model base \
@@ -124,7 +123,38 @@ ai-video-analyzer analyze "/path/to/video.mp4" \
 ai-video-analyzer doctor
 ```
 
-Prints the status of every dependency: Python version, VisionServeX, ffmpeg, GPU, Ollama models, Whisper, BLIP, PANNs.
+Checks: Python version, OpenCV, VisionServeX, D-FINE model registry, ffmpeg, PyTorch/GPU, Whisper, BLIP, PANNs, Ollama, moviepy, Tesseract.
+
+Required dependencies exit with `✗`. Optional dependencies show `✓` with an install hint when missing.
+Exits 0 if all required dependencies are present.
+
+---
+
+## Detection presets
+
+VisionServeX D-FINE models (COCO-80 classes, benchmarked on RTX 5080):
+
+| Preset | Model | ~ms/frame | Notes |
+|---|---|---|---|
+| `fast` | dfine-n | 17–21 | Speed-first; good accuracy |
+| `balanced` | dfine-s | 17–27 | **Default** — best all-round |
+| `quality` | dfine-m | 21–32 | Highest COCO accuracy |
+| `quality+` | dfine-l | higher | Maximum accuracy, slowest |
+
+```bash
+ai-video-analyzer analyze video.mp4 --preset fast
+ai-video-analyzer analyze video.mp4 --preset quality
+
+# Override with a specific model ID
+ai-video-analyzer analyze video.mp4 --model dfine-s
+
+# List all available models
+ai-video-analyzer list-models
+```
+
+**Known limitation**: COCO-80 does not include fire, smoke, or weather classes.
+D-FINE will return approximate visual matches (e.g. food textures for fire/smoke frames).
+The BLIP captioning stage handles these cases in natural language.
 
 ---
 
@@ -134,141 +164,75 @@ Each run writes to `--output-dir` (default: current directory):
 
 | File | Contents |
 |---|---|
-| `<video>_analysis.json` | Detections, captions, transcript, audio events, timings |
-| `<video>_analysis.md` | Human-readable Markdown report |
-| `report.txt` | Legacy plain-text report |
+| `<video>_analysis.json` | Full structured data: detections, captions, transcript, timings, preset |
+| `<video>_analysis.md` | Human-readable Markdown report with tables |
+| `report.txt` | Plain-text legacy report |
 
----
-
-## Detection presets
-
-VisionServeX D-FINE presets (benchmarked on RTX 5080 with real videos):
-
-| Preset | Model | ~ms/frame | When to use |
-|---|---|---|---|
-| `fast` | dfine-n | 17–21 | Large videos, speed matters |
-| `balanced` | dfine-s | 17–27 | **Default** — best all-round |
-| `quality` | dfine-m | 21–32 | Best COCO accuracy |
-| `quality+` | dfine-l | higher | Maximum accuracy, slower |
-
-```bash
-ai-video-analyzer analyze video.mp4 --preset fast
-ai-video-analyzer analyze video.mp4 --preset quality
-
-# Use a specific model ID instead of a preset
-ai-video-analyzer analyze video.mp4 --model dfine-x
-```
-
-**Known limitation**: COCO-80 does not include fire, smoke, or weather. D-FINE models will return approximate visual matches (e.g. food textures for fire). For fire/smoke detection, use the BLIP captioning stage (`--no-captioning` is off by default).
-
-```bash
-# List available models in your local VisionServeX registry
-ai-video-analyzer list-models
-```
-
----
-
-## Optional: LLM summarization with Ollama
-
-When Ollama is running, the pipeline generates a natural-language summary at the end.
-
-```bash
-# Start Ollama (if not already running)
-ollama serve
-
-# List available models
-ai-video-analyzer analyze video.mp4 --list-ollama-models
-
-# Choose a style
-ai-video-analyzer analyze video.mp4 --preset balanced --summary-style evidence
-```
-
-Summary styles:
-
-| Style | Description |
-|---|---|
-| `concise` | One paragraph, plain language (default) |
-| `evidence` | Grounded in detected objects and events |
-| `technical` | Includes model names and confidence scores |
-| `narrative` | Story-form prose |
-
-Ollama is **optional** — the detection and captioning stages work without it.
-
----
-
-## PANNs model (audio event detection)
-
-PANNs CNN14 is not auto-downloaded. Download it manually:
-
-```bash
-mkdir -p models
-# Download cnn14.pth from:
-# https://github.com/qiuqiangkong/audioset_tagging_cnn
-# Place it at: models/cnn14.pth
-```
-
-If not present, audio event detection is silently skipped.
+The JSON report includes: `preset`, `frame_strategy`, `timings`, `top labels`, and `limitations`.
 
 ---
 
 ## Benchmarking
 
 ```bash
-# Benchmark one video with the balanced preset
+# Single preset
 ai-video-analyzer benchmark "/path/to/video.mp4" --preset balanced
 
-# Compare all three presets side by side
+# Compare fast / balanced / quality side-by-side
 ai-video-analyzer benchmark "/path/to/video.mp4" --compare
 ```
 
-Output:
+Benchmark output:
 
 ```
-Benchmark: video.mp4
-  Strategy : adaptive
-  Preset   : balanced
-
-Results:
   Video duration     : 8.2s
   Frames selected    : 8  (sampling: 0.08s)
   Model load+warmup  : 0.52s
   Detection runtime  : 0.15s  (18.6ms/frame, 53.8fps)
   Total detections   : 48
-  Top labels         : dog(9), person(7), cat(5)
+  Top labels         : dog(9), person(7)
   Model              : dfine-s
 ```
+
+Real-world results in `reports/benchmarks/`.
+
+---
+
+## Optional: LLM summarization
+
+When Ollama is running, the pipeline generates a factual evidence-grounded summary.
+
+```bash
+# Start Ollama
+ollama serve
+ollama pull phi4:latest
+
+# Run with summarization
+ai-video-analyzer analyze video.mp4 --preset balanced --ollama-model phi4:latest
+
+# List installed models
+ai-video-analyzer analyze video.mp4 --list-ollama-models
+```
+
+The summary prompt separates **observed facts** from **plausible interpretation**, and says "Insufficient evidence" instead of guessing when data is weak.
 
 ---
 
 ## Troubleshooting
 
-### VisionServeX not installed
-
-```
-Error: VisionServeX backend requested but not installed or failed to load.
-Install with: pip install 'visionservex[hf,rfdetr]'
-```
-
-Fix:
+### VisionServeX not found
 
 ```bash
-python -m pip install -e ".[vision]"
+pip install 'visionservex[hf,rfdetr]'
 # or
-pip install "visionservex[hf,rfdetr]"
+pip install -e ".[vision]"
 ```
 
 ### ffmpeg not found
 
 ```bash
-sudo apt install ffmpeg     # Ubuntu/Debian
-brew install ffmpeg         # macOS
-```
-
-### Ollama not running
-
-```bash
-ollama serve
-ollama pull phi4:latest
+sudo apt install ffmpeg    # Ubuntu/Debian
+brew install ffmpeg        # macOS
 ```
 
 ### GPU not detected
@@ -278,7 +242,21 @@ python -c "import torch; print(torch.cuda.is_available())"
 ai-video-analyzer analyze video.mp4 --device cpu
 ```
 
-### Run doctor for a full diagnosis
+### No objects detected
+
+Run doctor to check the detection backend:
+
+```bash
+ai-video-analyzer doctor
+```
+
+If `dfine-s` shows as unavailable, try listing what is registered:
+
+```bash
+ai-video-analyzer list-models
+```
+
+### Run a full diagnostics check
 
 ```bash
 ai-video-analyzer doctor
@@ -299,49 +277,36 @@ The Tkinter GUI is also preserved:
 
 ```bash
 python video_processing_gui.py
-# or
 ai-video-analyzer gui
 ```
 
-**Legacy optional backend**: The original YOLO-based detection path from `video_processing_gui.py` is available as `--backend legacy_yolo` with the `[legacy-yolo]` extra (`pip install -e ".[legacy-yolo]"`). This path is not recommended for new use. The default and supported detection backend is VisionServeX D-FINE.
+**Legacy optional backend**: YOLO-based detection is available as `--backend legacy_yolo`
+with the `[legacy-yolo]` extra (`pip install -e ".[legacy-yolo]"`).
+This is not recommended for new use. VisionServeX D-FINE is the default and supported backend.
 
 ---
 
-## Pipeline architecture
+## Pipeline overview
 
 ```
 Video file
     │
-    ├─ Adaptive frame sampling (scene + motion aware)
-    │       └─ FrameRecord list (frame, timestamp, reason)
+    ├─ Adaptive frame sampling  (scene + motion aware)
     │
-    ├─ Object detection    → VisionServeX D-FINE (per frame)
-    ├─ Scene captioning    → BLIP (per frame, optional)
+    ├─ Object detection         → VisionServeX D-FINE (per frame)
+    ├─ Scene captioning         → BLIP (optional)
     │
     ├─ Audio extraction
-    │       ├─ Transcription (Whisper, optional)
-    │       └─ Audio events (PANNs CNN14, optional)
+    │       ├─ Transcription    → Whisper (optional)
+    │       └─ Audio events     → PANNs CNN14 (optional)
     │
-    └─ LLM summarization  → Ollama (optional)
+    └─ LLM summarization        → Ollama (optional)
             │
             └─ AnalysisReport
                     ├─ <video>_analysis.json
                     ├─ <video>_analysis.md
                     └─ report.txt
 ```
-
----
-
-## For coding agents
-
-- Install: `python -m pip install -e ".[vision]"`
-- Test: `pytest -q`
-- No media committed — videos are local-only test files
-- VisionServeX reference project at `/home/arash/PycharmProjects/VisionServeX` is read-only
-- Benchmark videos: `~/Videos/TETS\ VIDEOS/` (local, not committed)
-- Config: `ai_powered_video_analyzer/config.py` — `AnalysisConfig` dataclass
-- Pipeline entry: `ai_powered_video_analyzer/core.py` — `analyze_video(config)`
-- Detection backend: `ai_powered_video_analyzer/backends/visionservex_backend.py`
 
 ---
 
@@ -354,6 +319,23 @@ python -m pip install -e ".[dev]"
 pytest -q
 ruff check .
 ```
+
+---
+
+## For coding agents
+
+See [`docs/LLM_AGENT_GUIDE.md`](docs/LLM_AGENT_GUIDE.md) for the complete agent guide.
+
+Quick reference:
+
+- Install: `python -m pip install -e ".[vision]"`
+- Test: `pytest -q`
+- Doctor: `ai-video-analyzer doctor`
+- No media committed — videos and model weights are local-only
+- VisionServeX reference at `/home/arash/PycharmProjects/VisionServeX` is **read-only**
+- Config: `ai_powered_video_analyzer/config.py` — `AnalysisConfig` dataclass
+- Pipeline entry: `ai_powered_video_analyzer/core.py` — `analyze_video(config)`
+- Detection backend: `ai_powered_video_analyzer/backends/visionservex_backend.py`
 
 ---
 

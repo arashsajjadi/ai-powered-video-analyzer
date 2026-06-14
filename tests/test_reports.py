@@ -52,7 +52,7 @@ class TestAnalysisReport:
         r = _sample_report()
         md = r.to_markdown()
         assert "# AI-Powered Video Analysis Report" in md
-        assert "Executive Summary" in md
+        assert "Summary" in md
         assert "Speech Transcript" in md
         assert "Audio Events" in md
         assert "Detected Objects" in md

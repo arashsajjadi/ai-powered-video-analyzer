@@ -244,13 +244,26 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
             traceback.print_exc()
         return 1
 
+    from pathlib import Path
     print(f"\nAnalysis complete.")
     print(f"  Video     : {report.video_path}")
     print(f"  Duration  : {report.duration_sec:.1f}s")
     print(f"  Frames    : {report.sampled_frame_count} analyzed / {report.frame_count} total")
+    print(f"  Preset    : {report.preset}  model={report.model_ids.get('detector', '?')}")
     print(f"  Detections: {len(report.detections)}")
     print(f"  Captions  : {len(report.captions)}")
-    print(f"  Backend   : {report.backend}  model={report.model_ids.get('detector', '?')}")
+    if not report.detections:
+        print("  WARNING   : No objects detected. Run `ai-video-analyzer doctor` to verify dependencies.")
+    if not args.no_captioning and not report.captions:
+        print("  NOTE      : No captions generated (BLIP may not be installed or captioning failed).")
+    if not args.no_summarization and not report.summary:
+        print("  NOTE      : No summary generated (start Ollama with `ollama serve`).")
+    stem = Path(report.video_path).stem + "_analysis"
+    json_out = Path(args.output_dir) / f"{stem}.json"
+    md_out = Path(args.output_dir) / f"{stem}.md"
+    print(f"\nOutput files:")
+    print(f"  JSON    : {json_out}")
+    print(f"  Markdown: {md_out}")
     if report.summary:
         print(f"\nSummary:\n{report.summary}")
     return 0
@@ -357,7 +370,7 @@ def _run_preset_comparison(video_path: str, device: str, max_frames: int) -> int
     return 0
 
 
-def _cmd_gui() -> int:
+def _cmd_gui(args: argparse.Namespace) -> int:
     try:
         import tkinter as tk
         import os
@@ -372,7 +385,7 @@ def _cmd_gui() -> int:
         return 1
 
 
-def _cmd_list_models() -> int:
+def _cmd_list_models(args: argparse.Namespace) -> int:
     from ai_powered_video_analyzer.backends.visionservex_backend import list_available_detect_models
     from ai_powered_video_analyzer.backends import PRESET_MODELS
     print("\nDetection presets (--preset):")

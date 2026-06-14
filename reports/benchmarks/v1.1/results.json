@@ -1,0 +1,89 @@
+{
+  "version": "1.1.0",
+  "date": "2026-06-14",
+  "hardware": "NVIDIA RTX 5080",
+  "visionservex": "3.11.0",
+  "python": "3.13.12",
+  "method": "adaptive sampling, max_frames=40, confidence=0.3, GPU pre-warmed",
+  "results": [
+    {
+      "video": "20250513_051837.mp4",
+      "duration_sec": 8.2,
+      "subject": "person with dog",
+      "preset": "fast",
+      "model": "dfine-n",
+      "frames_selected": 31,
+      "ms_per_frame": 18.5,
+      "fps_analyzed": 54.1,
+      "total_detections": 176,
+      "top_labels": [
+        {"label": "dog", "count": 41},
+        {"label": "cat", "count": 35},
+        {"label": "bird", "count": 29},
+        {"label": "person", "count": 20},
+        {"label": "bed", "count": 17}
+      ],
+      "qualitative": "Dog and person correctly detected. cat/bird ambiguity at head angles expected."
+    },
+    {
+      "video": "20250513_051837.mp4",
+      "duration_sec": 8.2,
+      "subject": "person with dog",
+      "preset": "balanced",
+      "model": "dfine-s",
+      "frames_selected": 31,
+      "ms_per_frame": 21.1,
+      "fps_analyzed": 47.3,
+      "total_detections": 186,
+      "top_labels": [
+        {"label": "dog", "count": 50},
+        {"label": "person", "count": 41},
+        {"label": "cat", "count": 38},
+        {"label": "bird", "count": 18},
+        {"label": "bed", "count": 17}
+      ],
+      "qualitative": "Dog and person correctly detected. More person detections than fast preset."
+    },
+    {
+      "video": "20250318_222814_1.mp4",
+      "duration_sec": 14.0,
+      "subject": "fire and burning wood",
+      "preset": "balanced",
+      "model": "dfine-s",
+      "frames_selected": 40,
+      "ms_per_frame": 20.4,
+      "fps_analyzed": 49.1,
+      "total_detections": 309,
+      "top_labels": [
+        {"label": "person", "count": 111},
+        {"label": "cake", "count": 82},
+        {"label": "bird", "count": 32},
+        {"label": "sandwich", "count": 19},
+        {"label": "pizza", "count": 14}
+      ],
+      "qualitative": "Fire/smoke not in COCO-80. Food-texture misclassification expected and documented.",
+      "limitation": "COCO-80 does not include fire class"
+    },
+    {
+      "video": "XiaoYing_Video_1744499827499_HD.mp4",
+      "duration_sec": 12.4,
+      "subject": "tourist location with people",
+      "preset": "balanced",
+      "model": "dfine-s",
+      "frames_selected": 40,
+      "ms_per_frame": 15.5,
+      "fps_analyzed": 64.3,
+      "total_detections": 60,
+      "top_labels": [
+        {"label": "person", "count": 24},
+        {"label": "bird", "count": 17},
+        {"label": "cell phone", "count": 9},
+        {"label": "backpack", "count": 3},
+        {"label": "aeroplane", "count": 3}
+      ],
+      "qualitative": "Person and phone correctly detected. Bird likely water spray. Qualitatively accurate."
+    }
+  ],
+  "private_media_committed": false,
+  "video_files_committed": false
+}
