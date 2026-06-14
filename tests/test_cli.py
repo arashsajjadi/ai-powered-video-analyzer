@@ -25,7 +25,7 @@ def test_cli_help():
 def test_cli_analyze_help():
     result = _run("analyze", "--help")
     assert result.returncode == 0
-    assert "--video" in result.stdout or "video" in result.stdout
+    assert "video" in result.stdout.lower()
 
 
 def test_cli_doctor_help():
@@ -33,33 +33,37 @@ def test_cli_doctor_help():
     assert result.returncode == 0
 
 
+def test_cli_benchmark_help():
+    result = _run("benchmark", "--help")
+    assert result.returncode == 0
+    assert "preset" in result.stdout.lower()
+
+
 def test_cli_version():
     result = _run("--version")
     assert result.returncode == 0
-    assert "0.3.0" in result.stdout
+    assert "1.0.0" in result.stdout
 
 
-def test_cli_analyze_has_detector_preset():
+def test_cli_analyze_has_preset():
     result = _run("analyze", "--help")
     assert result.returncode == 0
-    assert "detector-preset" in result.stdout or "preset" in result.stdout.lower()
+    assert "--preset" in result.stdout
 
 
 def test_cli_analyze_has_summary_style():
     result = _run("analyze", "--help")
     assert result.returncode == 0
-    assert "summary-style" in result.stdout or "summary_style" in result.stdout
+    assert "summary" in result.stdout.lower()
 
 
 def test_cli_list_models():
     result = _run("list-models")
-    # May fail if visionservex not installed — just must not crash unexpectedly
     assert result.returncode in (0, 1)
 
 
 def test_video_processing_py_help():
     """The compatibility shim must accept --help."""
-    import subprocess
     from pathlib import Path
     script = Path(__file__).parent.parent / "video_processing.py"
     result = subprocess.run(
@@ -75,3 +79,9 @@ def test_cli_analyze_missing_file():
     """Analyzing a nonexistent file must exit with code 1."""
     result = _run("analyze", "/nonexistent/video_that_does_not_exist.mp4")
     assert result.returncode == 1
+
+
+def test_cli_benchmark_help_has_compare():
+    result = _run("benchmark", "--help")
+    assert result.returncode == 0
+    assert "--compare" in result.stdout

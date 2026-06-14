@@ -1,0 +1,308 @@
+[
+  {
+    "video": "dog",
+    "status": "OK",
+    "benchmarks": [
+      {
+        "preset": "fast",
+        "model": "dfine-n",
+        "duration_sec": 8.2,
+        "frames_sampled": 30,
+        "total_dets": 172,
+        "avg_ms_per_frame": 19.2,
+        "fps_analyzed": 52.1,
+        "top_labels": {
+          "dog": {
+            "max_score": 0.903,
+            "count": 40
+          },
+          "cat": {
+            "max_score": 0.886,
+            "count": 34
+          },
+          "bird": {
+            "max_score": 0.651,
+            "count": 29
+          }
+        }
+      },
+      {
+        "preset": "balanced",
+        "model": "dfine-s",
+        "duration_sec": 8.2,
+        "frames_sampled": 30,
+        "total_dets": 180,
+        "avg_ms_per_frame": 27.3,
+        "fps_analyzed": 36.7,
+        "top_labels": {
+          "dog": {
+            "max_score": 0.867,
+            "count": 49
+          },
+          "person": {
+            "max_score": 0.925,
+            "count": 39
+          },
+          "cat": {
+            "max_score": 0.874,
+            "count": 37
+          }
+        }
+      },
+      {
+        "preset": "quality",
+        "model": "dfine-m",
+        "duration_sec": 8.2,
+        "frames_sampled": 30,
+        "total_dets": 160,
+        "avg_ms_per_frame": 21.2,
+        "fps_analyzed": 47.3,
+        "top_labels": {
+          "dog": {
+            "max_score": 0.93,
+            "count": 43
+          },
+          "person": {
+            "max_score": 0.934,
+            "count": 39
+          },
+          "cat": {
+            "max_score": 0.909,
+            "count": 28
+          }
+        }
+      }
+    ]
+  },
+  {
+    "video": "fire",
+    "status": "OK",
+    "benchmarks": [
+      {
+        "preset": "fast",
+        "model": "dfine-n",
+        "duration_sec": 14.0,
+        "frames_sampled": 30,
+        "total_dets": 157,
+        "avg_ms_per_frame": 19.7,
+        "fps_analyzed": 50.8,
+        "top_labels": {
+          "cake": {
+            "max_score": 0.726,
+            "count": 46
+          },
+          "bird": {
+            "max_score": 0.663,
+            "count": 26
+          },
+          "pizza": {
+            "max_score": 0.545,
+            "count": 22
+          }
+        }
+      },
+      {
+        "preset": "balanced",
+        "model": "dfine-s",
+        "duration_sec": 14.0,
+        "frames_sampled": 30,
+        "total_dets": 234,
+        "avg_ms_per_frame": 19.3,
+        "fps_analyzed": 51.8,
+        "top_labels": {
+          "person": {
+            "max_score": 0.724,
+            "count": 95
+          },
+          "cake": {
+            "max_score": 0.687,
+            "count": 53
+          },
+          "sandwich": {
+            "max_score": 0.652,
+            "count": 15
+          }
+        }
+      },
+      {
+        "preset": "quality",
+        "model": "dfine-m",
+        "duration_sec": 14.0,
+        "frames_sampled": 30,
+        "total_dets": 194,
+        "avg_ms_per_frame": 29.8,
+        "fps_analyzed": 33.5,
+        "top_labels": {
+          "cake": {
+            "max_score": 0.904,
+            "count": 123
+          },
+          "broccoli": {
+            "max_score": 0.7,
+            "count": 40
+          },
+          "sandwich": {
+            "max_score": 0.755,
+            "count": 14
+          }
+        }
+      }
+    ]
+  },
+  {
+    "video": "niagara",
+    "status": "OK",
+    "benchmarks": [
+      {
+        "preset": "fast",
+        "model": "dfine-n",
+        "duration_sec": 12.4,
+        "frames_sampled": 30,
+        "total_dets": 28,
+        "avg_ms_per_frame": 17.8,
+        "fps_analyzed": 56.2,
+        "top_labels": {
+          "person": {
+            "max_score": 0.881,
+            "count": 15
+          },
+          "cell phone": {
+            "max_score": 0.887,
+            "count": 9
+          },
+          "bird": {
+            "max_score": 0.355,
+            "count": 3
+          }
+        }
+      },
+      {
+        "preset": "balanced",
+        "model": "dfine-s",
+        "duration_sec": 12.4,
+        "frames_sampled": 30,
+        "total_dets": 35,
+        "avg_ms_per_frame": 17.1,
+        "fps_analyzed": 58.4,
+        "top_labels": {
+          "person": {
+            "max_score": 0.906,
+            "count": 23
+          },
+          "cell phone": {
+            "max_score": 0.889,
+            "count": 9
+          },
+          "handbag": {
+            "max_score": 0.353,
+            "count": 1
+          }
+        }
+      },
+      {
+        "preset": "quality",
+        "model": "dfine-m",
+        "duration_sec": 12.4,
+        "frames_sampled": 30,
+        "total_dets": 36,
+        "avg_ms_per_frame": 21.1,
+        "fps_analyzed": 47.3,
+        "top_labels": {
+          "person": {
+            "max_score": 0.926,
+            "count": 19
+          },
+          "cell phone": {
+            "max_score": 0.903,
+            "count": 12
+          },
+          "sheep": {
+            "max_score": 0.358,
+            "count": 3
+          }
+        }
+      }
+    ]
+  },
+  {
+    "video": "car_cleaning",
+    "status": "OK",
+    "benchmarks": [
+      {
+        "preset": "fast",
+        "model": "dfine-n",
+        "duration_sec": 9.9,
+        "frames_sampled": 30,
+        "total_dets": 331,
+        "avg_ms_per_frame": 20.7,
+        "fps_analyzed": 48.4,
+        "top_labels": {
+          "person": {
+            "max_score": 0.911,
+            "count": 123
+          },
+          "car": {
+            "max_score": 0.889,
+            "count": 62
+          },
+          "truck": {
+            "max_score": 0.799,
+            "count": 51
+          }
+        }
+      },
+      {
+        "preset": "balanced",
+        "model": "dfine-s",
+        "duration_sec": 9.9,
+        "frames_sampled": 30,
+        "total_dets": 283,
+        "avg_ms_per_frame": 26.6,
+        "fps_analyzed": 37.6,
+        "top_labels": {
+          "car": {
+            "max_score": 0.926,
+            "count": 72
+          },
+          "truck": {
+            "max_score": 0.745,
+            "count": 66
+          },
+          "person": {
+            "max_score": 0.937,
+            "count": 50
+          }
+        }
+      },
+      {
+        "preset": "quality",
+        "model": "dfine-m",
+        "duration_sec": 9.9,
+        "frames_sampled": 30,
+        "total_dets": 244,
+        "avg_ms_per_frame": 31.3,
+        "fps_analyzed": 31.9,
+        "top_labels": {
+          "car": {
+            "max_score": 0.965,
+            "count": 63
+          },
+          "truck": {
+            "max_score": 0.829,
+            "count": 55
+          },
+          "person": {
+            "max_score": 0.932,
+            "count": 41
+          }
+        }
+      }
+    ]
+  },
+  {
+    "video": "private_fall_smoke",
+    "status": "completed",
+    "runtime_sec": 0.1,
+    "frames": 10
+  }
+]

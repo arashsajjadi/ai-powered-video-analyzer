@@ -7,6 +7,54 @@ This project uses [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.0.0] — 2026-06-14
+
+### Added
+- **`[vision]` pip extra** — `pip install -e ".[vision]"` installs VisionServeX only; cleanest install path for detection.
+- **`--preset`** flag on `analyze` and `benchmark` commands. Replaces the verbose `--detector-preset`. Choices: `fast | balanced | quality | quality+`.
+- **`--model`** flag to override preset with an explicit VisionServeX model ID.
+- **`--confidence`** flag (replaces `--detection-confidence`) for cleaner CLI.
+- **`--compare`** flag on `benchmark` to compare all presets side-by-side.
+- **`--save-video`** replaces `--save-annotated-video`.
+- **`benchmark` output** now reports: duration, frames selected, model load time, detection runtime, fps analyzed, total detections, top labels.
+- **"For coding agents" section** in README with install/test/reference paths.
+- **v1.0 benchmark results** in `reports/benchmarks/v1.0/` for 4 videos (dog, fire, Niagara, car cleaning) + private fall smoke (sanitized).
+- **Python 3.13 classifier** added to `pyproject.toml`.
+
+### Changed
+- **`pyproject.toml` restructured**: base deps now minimal (`numpy`, `Pillow`, `opencv-python-headless`); `tqdm` and `psutil` removed (not used); `[vision]` extra added; `[full]` updated.
+- **README fully rewritten** for v1.0: pip-first, no conda-first install path, clean canonical commands, "For coding agents" section, correct credit attribution.
+- **`pip_requirements.txt` simplified** and updated for v1.0.
+- **`video_processing.py`** shim updated to use `--preset` instead of `--detector-preset`.
+- **CLI description** dynamically reflects version from `__version__` (no more hardcoded string).
+- **`list-models`** output improved with `[default]` marker.
+- **`eval-backends` subcommand removed** (redundant with `benchmark --compare`).
+- Version bumped to `1.0.0`.
+
+### Removed
+- **`conda_requirements.txt`** — the broken Windows conda export dump that was the root of issue #1. Removed from git tracking.
+- **`environment.yml`** — removed to avoid confusion; conda is not the primary or recommended install path.
+- **`--detector-preset`** — replaced by `--preset` (shorter, canonical).
+- **`--detection-confidence`** — replaced by `--confidence`.
+- **`--save-annotated-video`** — replaced by `--save-video`.
+- **`eval-backends` subcommand** — merged into `benchmark --compare`.
+- **`tqdm` and `psutil`** from base dependencies (not used in source).
+
+### Benchmark evidence (RTX 5080, 2026-06-14)
+
+| Video     | Preset   | Model   | ms/frame | fps  | Result                       |
+|-----------|----------|---------|----------|------|------------------------------|
+| dog       | fast     | dfine-n | 19.2     | 52.1 | dog(0.90) ✓                  |
+| dog       | balanced | dfine-s | 27.3     | 36.7 | dog(0.87), person(0.92) ✓    |
+| dog       | quality  | dfine-m | 21.2     | 47.3 | dog(0.93), person(0.93) ✓    |
+| fire      | balanced | dfine-s | 19.3     | 51.8 | person(0.72) — fire∉COCO-80  |
+| niagara   | balanced | dfine-s | 17.1     | 58.4 | person(0.91), phone(0.89) ✓  |
+| car clean | balanced | dfine-s | 26.6     | 37.6 | car(0.93), person(0.94) ✓    |
+
+Private fall/smoke: `completed, runtime=0.1s, frames=10, no media committed.`
+
+---
+
 ## [0.3.0] — 2026-06-14
 
 ### Changed (Breaking)

@@ -4,17 +4,19 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ai-powered-video-analyzer"
-version = "0.3.0"
-description = "Offline, privacy-first AI video understanding: VisionServeX detection, captioning, transcription, and LLM summarization."
+version = "1.0.0"
+description = "Offline, privacy-first AI video analysis: object detection, captioning, transcription, and LLM summarization."
 readme = "README.md"
 license = {text = "MIT"}
 authors = [{name = "Arash Sajjadi", email = "arash.sajjadi@usask.ca"}]
+maintainers = [{name = "Arash Sajjadi", email = "arash.sajjadi@usask.ca"}]
 keywords = ["video", "ai", "computer-vision", "offline", "privacy", "visionservex", "dfine", "whisper", "blip"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Topic :: Multimedia :: Video",
@@ -22,21 +24,24 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 
-# Minimal core — installs without heavy models
+# Core: frame decoding and basic types only.
+# No model weights, no heavy ML frameworks.
 dependencies = [
     "numpy>=1.24",
     "Pillow>=10.0",
-    "tqdm>=4.65",
-    "psutil>=5.9",
+    "opencv-python-headless>=4.8",
 ]
 
 [project.optional-dependencies]
-# Full local AI stack (all pipeline components)
-# Primary detection backend: VisionServeX (D-FINE / RF-DETR families)
-full = [
-    "torch>=2.0",
-    "opencv-python-headless>=4.8",
+# VisionServeX detection backend (required for object detection)
+vision = [
     "visionservex>=3.11.0",
+]
+
+# Full local AI stack: detection + transcription + captioning + audio + summarization
+full = [
+    "visionservex>=3.11.0",
+    "torch>=2.0",
     "openai-whisper>=20231117",
     "transformers>=4.35",
     "librosa>=0.10",
@@ -46,13 +51,13 @@ full = [
     "ollama>=0.3",
 ]
 
-# GUI support
+# GUI (Tkinter-based)
 gui = [
     "ai-powered-video-analyzer[full]",
     "opencv-python>=4.8",
 ]
 
-# Legacy YOLO backend (not the default since v0.3.0 — use VisionServeX instead)
+# Legacy YOLO/Ultralytics backend (not the default; not recommended for new installs)
 legacy-yolo = [
     "ultralytics>=8.0",
 ]

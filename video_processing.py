@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 """
-video_processing.py — CLI compatibility shim for ai-powered-video-analyzer.
+video_processing.py — legacy CLI shim for ai-powered-video-analyzer.
 
-This script preserves the command-line interface that the README documents:
+This script preserves the interface documented in the original README:
     python video_processing.py --video path/to/video.mp4 --save
 
-For the full feature set, use the package CLI instead:
-    ai-video-analyzer analyze path/to/video.mp4
-    python -m ai_powered_video_analyzer.cli analyze path/to/video.mp4
+For the full feature set, prefer the package CLI:
+    ai-video-analyzer analyze path/to/video.mp4 --preset balanced
+    ai-video-analyzer doctor
 """
 
 from __future__ import annotations
@@ -20,25 +20,25 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         prog="video_processing.py",
         description=(
-            "Offline AI video analysis — object detection, captioning, "
-            "transcription, audio events, and LLM summarization."
+            "Offline AI video analysis: detection, captioning, transcription, "
+            "audio events, LLM summarization.\n"
+            "Tip: the package CLI offers more options — run: ai-video-analyzer --help"
         ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--video", required=True, help="Path to the input video file.")
-    parser.add_argument(
-        "--save", action="store_true", help="Save annotated output video."
-    )
+    parser.add_argument("--save", action="store_true", help="Write annotated output video.")
     parser.add_argument(
         "--backend",
-        choices=["auto", "visionservex", "none", "legacy_yolo"],
+        choices=["visionservex", "none", "legacy_yolo"],
         default="visionservex",
-        help="Object detection backend (default: visionservex).",
+        help="Detection backend (default: visionservex).",
     )
     parser.add_argument(
-        "--detector-preset",
+        "--preset",
         choices=["fast", "balanced", "quality", "quality+"],
         default="balanced",
-        help="Detector preset (default: balanced = dfine-s).",
+        help="Detector preset: fast|balanced|quality|quality+ (default: balanced).",
     )
     parser.add_argument(
         "--strategy",
@@ -47,6 +47,7 @@ def main() -> int:
         help="Frame sampling strategy (default: adaptive).",
     )
     parser.add_argument("--target-fps", type=float, default=1.0)
+    parser.add_argument("--max-frames", type=int, default=2000)
     parser.add_argument("--whisper-model", default="base")
     parser.add_argument("--ollama-model", default="")
     parser.add_argument("--output-dir", default=".")
@@ -70,8 +71,9 @@ def main() -> int:
         output_dir=args.output_dir,
         frame_strategy=args.strategy,
         target_fps=args.target_fps,
+        max_frames=args.max_frames,
         backend=args.backend,
-        detector_preset=args.detector_preset,
+        detector_preset=args.preset,
         whisper_model=args.whisper_model,
         ollama_model=args.ollama_model,
         device=args.device,
