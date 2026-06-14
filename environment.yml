@@ -1,10 +1,11 @@
-# environment.yml — Conda environment for ai-powered-video-analyzer
+# environment.yml — Conda environment for ai-powered-video-analyzer v0.3.0
 #
 # Create and activate:
 #   conda env create -f environment.yml
 #   conda activate ai-video-analyzer
 #
 # This file uses valid conda environment format (NOT a conda export dump).
+# Primary detection backend since v0.3.0: VisionServeX (D-FINE / RF-DETR).
 
 name: ai-video-analyzer
 
@@ -36,13 +37,13 @@ dependencies:
   # pip-only packages (no conda equivalents)
   - pip
   - pip:
-    - ultralytics>=8.0
+    - visionservex>=3.11.0
     - openai-whisper>=20231117
     - transformers>=4.35
     - accelerate>=0.24
     - panns-inference>=0.1
     - ollama>=0.3
-    # Optional: VisionServeX backend
-    # - visionservex>=3.11.0
+    # Legacy YOLO backend (not recommended since v0.3.0 — VisionServeX is the default):
+    # - ultralytics>=8.0
     # Optional: OCR
     # - pytesseract>=0.3.10

@@ -22,14 +22,15 @@ def run_doctor(verbose: bool = False) -> list[CheckResult]:
         _check_ffmpeg(),
         _check_opencv(),
         _check_torch(),
-        _check_ultralytics(),
+        _check_visionservex(),
+        _check_dfine_model(),
         _check_whisper(),
         _check_transformers(),
         _check_panns(),
         _check_ollama(),
-        _check_visionservex(),
         _check_tesseract(),
         _check_moviepy(),
+        _check_ultralytics_optional(),
     ]
     return checks
 
@@ -95,14 +96,20 @@ def _check_torch() -> CheckResult:
         return CheckResult("PyTorch", False, "not installed — pip install torch")
 
 
-def _check_ultralytics() -> CheckResult:
+def _check_ultralytics_optional() -> CheckResult:
+    """Legacy YOLO backend — not required since v0.3.0."""
     try:
         import ultralytics
-        return CheckResult("ultralytics (YOLO)", True, ultralytics.__version__)
+        return CheckResult(
+            "ultralytics (legacy YOLO)",
+            True,
+            f"{ultralytics.__version__} (installed — not needed for default pipeline since v0.3.0)",
+        )
     except ImportError:
         return CheckResult(
-            "ultralytics (YOLO)", False,
-            "not installed — pip install ultralytics (optional for YOLO backend)"
+            "ultralytics (legacy YOLO)",
+            True,  # Not a failure — VisionServeX is the default
+            "not installed (optional legacy backend — VisionServeX is the default since v0.3.0)",
         )
 
 
@@ -155,18 +162,59 @@ def _check_ollama() -> CheckResult:
 
 
 def _check_visionservex() -> CheckResult:
+    """Primary detection backend — required since v0.3.0."""
     try:
         import visionservex
+        version = getattr(visionservex, "__version__", "installed")
+        return CheckResult("VisionServeX", True, f"{version} (primary detection backend)")
+    except ImportError:
         return CheckResult(
-            "VisionServeX (optional)",
-            True,
-            getattr(visionservex, "__version__", "installed"),
+            "VisionServeX",
+            False,
+            "not installed — pip install 'visionservex[hf,rfdetr]' (required for object detection)",
+        )
+
+
+def _check_dfine_model() -> CheckResult:
+    """Probe whether the default D-FINE model (dfine-s) is available in the registry."""
+    try:
+        from visionservex.registry import default_registry  # type: ignore[import]
+        reg = default_registry()
+        entries = {m.id: m for m in reg.list()}
+        target = "dfine-s"
+        if target in entries:
+            e = entries[target]
+            status = getattr(e, "status", "unknown")
+            impl = getattr(e, "implementation_status", "unknown")
+            return CheckResult(
+                "VisionServeX dfine-s (balanced preset)",
+                True,
+                f"status={status}, impl={impl}",
+            )
+        # Fallback: check if any dfine model is available
+        dfine_ids = [k for k in entries if k.startswith("dfine")]
+        if dfine_ids:
+            return CheckResult(
+                "VisionServeX dfine-s (balanced preset)",
+                True,
+                f"dfine-s not in registry but found: {', '.join(sorted(dfine_ids))}",
+            )
+        return CheckResult(
+            "VisionServeX dfine-s (balanced preset)",
+            False,
+            "No D-FINE models found in registry. Run: ai-video-analyzer list-models",
         )
     except ImportError:
         return CheckResult(
-            "VisionServeX (optional)",
-            True,  # Optional — not a failure
-            "not installed (optional) — pip install 'visionservex[hf,rfdetr]'",
+            "VisionServeX dfine-s (balanced preset)",
+            False,
+            "VisionServeX not installed — cannot probe registry",
+        )
+    except Exception as exc:
+        return CheckResult(
+            "VisionServeX dfine-s (balanced preset)",
+            False,
+            f"Registry probe failed: {exc}",
         )
 
 

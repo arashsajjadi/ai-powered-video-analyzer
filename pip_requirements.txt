@@ -1,14 +1,14 @@
-# pip_requirements.txt — Full local AI stack for ai-powered-video-analyzer
+# pip_requirements.txt — Full local AI stack for ai-powered-video-analyzer v0.3.0
 # Install with: pip install -r pip_requirements.txt
 #
 # For a minimal install without heavy models, use:
 #   pip install -e .
 #
-# For the full stack (all pipeline components):
+# For the full stack (all pipeline components including VisionServeX):
 #   pip install -e ".[full]"
 #
-# For optional VisionServeX backend:
-#   pip install -e ".[full,visionservex]"
+# For the legacy YOLO backend (not recommended since v0.3.0):
+#   pip install -e ".[legacy-yolo]"
 
 # Core
 numpy>=1.24,<3.0
@@ -25,8 +25,8 @@ torch>=2.0
 torchvision>=0.15
 torchaudio>=2.0
 
-# Object detection
-ultralytics>=8.0
+# Object detection — primary backend (VisionServeX D-FINE / RF-DETR)
+visionservex>=3.11.0
 
 # Speech transcription
 openai-whisper>=20231117
@@ -48,6 +48,9 @@ ollama>=0.3
 # Utilities
 requests>=2.31
 pyyaml>=6.0
+
+# Optional: Legacy YOLO backend (not recommended, install only if needed)
+# ultralytics>=8.0
 
 # Optional: OCR (uncomment if needed)
 # pytesseract>=0.3.10
