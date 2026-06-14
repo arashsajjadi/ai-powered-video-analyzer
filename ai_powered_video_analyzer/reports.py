@@ -5,6 +5,7 @@ from __future__ import annotations
 import dataclasses
 import json
 import os
+from collections import Counter
 from typing import Any
 
 from ai_powered_video_analyzer.logging_utils import get_logger
@@ -26,6 +27,11 @@ class AnalysisReport:
     backend: str
     model_ids: dict[str, str]
 
+    # Run configuration (added v1.1)
+    preset: str = "balanced"
+    frame_strategy: str = "adaptive"
+    timings: dict[str, float] = dataclasses.field(default_factory=dict)
+
     transcript: str = ""
     transcript_language: str = "unknown"
     audio_events: dict[str, list[str]] = dataclasses.field(default_factory=dict)
@@ -37,6 +43,10 @@ class AnalysisReport:
     summary: str = ""
     limitations: list[str] = dataclasses.field(default_factory=list)
 
+    def top_labels(self, n: int = 10) -> list[tuple[str, int]]:
+        """Return the top-n detected labels by count."""
+        return Counter(d["label"] for d in self.detections).most_common(n)
+
     def to_dict(self) -> dict:
         return dataclasses.asdict(self)
 
@@ -47,20 +57,69 @@ class AnalysisReport:
         lines: list[str] = []
         lines.append("# AI-Powered Video Analysis Report")
         lines.append("")
-        lines.append("## Video Metadata")
+
+        # --- Run configuration ---
+        lines.append("## Run Configuration")
         lines.append(f"- **File**: `{self.video_path}`")
         lines.append(f"- **Duration**: {self.duration_sec:.1f}s")
         lines.append(f"- **Resolution**: {self.width}×{self.height} @ {self.fps:.2f} fps")
         lines.append(f"- **Total frames**: {self.frame_count}")
-        lines.append(f"- **Analyzed frames**: {self.sampled_frame_count}")
+        lines.append(f"- **Frames analyzed**: {self.sampled_frame_count}")
+        lines.append(f"  *(sampling strategy: {self.frame_strategy})*")
         lines.append(f"- **Detection backend**: {self.backend}")
+        lines.append(f"- **Detector preset**: {self.preset}")
+        lines.append(f"- **Detector model**: {self.model_ids.get('detector', 'unknown')}")
+        if self.timings:
+            total = sum(self.timings.values())
+            timing_str = " | ".join(f"{k}: {v:.1f}s" for k, v in sorted(self.timings.items()))
+            lines.append(f"- **Timing**: {timing_str} | total: {total:.1f}s")
         lines.append("")
 
+        # --- Executive summary ---
         if self.summary:
-            lines.append("## Executive Summary")
+            lines.append("## Summary")
             lines.append(self.summary)
             lines.append("")
 
+        # --- Detected objects ---
+        if self.detections:
+            top = self.top_labels(20)
+            lines.append(f"## Detected Objects ({len(self.detections)} total detections)")
+            lines.append("")
+            lines.append("| Label | Count | Max confidence |")
+            lines.append("|-------|-------|---------------|")
+            label_scores: dict[str, float] = {}
+            for d in self.detections:
+                lbl = d["label"]
+                sc = d.get("score", 0.0)
+                if sc > label_scores.get(lbl, 0.0):
+                    label_scores[lbl] = sc
+            for label, count in top:
+                max_score = label_scores.get(label, 0.0)
+                lines.append(f"| {label} | {count} | {max_score:.2f} |")
+            lines.append("")
+        else:
+            lines.append("## Detected Objects")
+            lines.append(
+                "> **Warning**: No objects detected. "
+                "Check that the detection backend is installed (`ai-video-analyzer doctor`) "
+                "and the video file is valid."
+            )
+            lines.append("")
+
+        # --- Frame captions ---
+        if self.captions:
+            lines.append(f"## Scene Descriptions (BLIP captions, {len(self.captions)} frames)")
+            lines.append("")
+            lines.append("| Time | Caption |")
+            lines.append("|------|---------|")
+            for cap in self.captions[:15]:
+                ts = cap.get("timestamp_sec", 0)
+                text = cap.get("caption", "")
+                lines.append(f"| {ts:.1f}s | {text} |")
+            lines.append("")
+
+        # --- Transcript ---
         if self.transcript:
             lines.append("## Speech Transcript")
             lines.append(f"*Detected language: {self.transcript_language}*")
@@ -68,6 +127,7 @@ class AnalysisReport:
             lines.append(self.transcript)
             lines.append("")
 
+        # --- Audio events ---
         if self.audio_events:
             lines.append("## Audio Events")
             for event, times in self.audio_events.items():
@@ -75,22 +135,7 @@ class AnalysisReport:
                 lines.append(f"- **{event}**: {ts}")
             lines.append("")
 
-        if self.detections:
-            lines.append("## Detected Objects (sample, top 20)")
-            from collections import Counter
-            counts = Counter(d["label"] for d in self.detections)
-            for label, count in counts.most_common(20):
-                lines.append(f"- **{label}**: seen {count}× across sampled frames")
-            lines.append("")
-
-        if self.captions:
-            lines.append("## Frame Captions (sample, up to 10)")
-            for cap in self.captions[:10]:
-                ts = cap.get("timestamp_sec", 0)
-                text = cap.get("caption", "")
-                lines.append(f"- `{ts:.1f}s`: {text}")
-            lines.append("")
-
+        # --- Limitations ---
         if self.limitations:
             lines.append("## Limitations & Notes")
             for note in self.limitations:
@@ -123,7 +168,7 @@ def save_report(report: AnalysisReport, output_dir: str, stem: str = "report") -
     except Exception as exc:
         log.error("Failed to save Markdown report: %s", exc)
 
-    # Legacy compatibility: write report.txt
+    # Legacy plain-text compatibility
     txt_path = os.path.join(output_dir, "report.txt")
     try:
         with open(txt_path, "w", encoding="utf-8") as f:

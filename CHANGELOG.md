@@ -7,6 +7,42 @@ This project uses [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.1.0] — 2026-06-14
+
+### Added
+- **`docs/USER_GUIDE.md`** — 18-section beginner guide covering install, first run, presets, captioning, Ollama, benchmarking, common errors, privacy rules, and known limitations.
+- **`docs/LLM_AGENT_GUIDE.md`** — Complete agent guide with non-negotiable safety rules, canonical commands, key file map, pipeline overview, how-to add backends/fields/tests, release checklist, and attribution hygiene checklist.
+- **`reports/quality/v1.1-final-audit.md`** — 58-point final audit covering contributor hygiene, install UX, README, LLM-agent friendliness, code quality, benchmarks, and release readiness.
+- **`reports/benchmarks/v1.1/`** — Compact benchmark results for 3 real videos (dog, fire, tourist) on RTX 5080.
+- **`AnalysisReport.preset`** and **`AnalysisReport.frame_strategy`** fields — JSON and Markdown reports now include the detection preset and sampling strategy used.
+- **`AnalysisReport.timings`** — Per-stage wall times included in JSON and Markdown reports.
+- **`AnalysisReport.top_labels(n)`** — Helper method for computing top-n detected labels.
+- **New test**: `test_docs_user_guide_exists`, `test_docs_llm_agent_guide_exists`, `test_llm_agent_guide_contains_safety_rules` — verify doc files and safety rule content.
+- **New test**: `test_no_claude_anthropic_in_tracked_files` — CI guard against attribution drift.
+- **New test**: `test_readme_no_yolo_in_credits` — CI guard against YOLO reappearing in credits.
+- **New test**: `test_report_has_preset_and_timings` — verifies new report fields round-trip through JSON.
+
+### Changed
+- **README rewritten** for v1.1: professional structure, beginner-readable, expanded output file section, accurate troubleshooting, links to USER_GUIDE and LLM_AGENT_GUIDE.
+- **`AnalysisReport.to_markdown()`** improved: run configuration table, detected objects table with max-confidence column, scene captions table with timestamps, explicit warning when no detections found.
+- **LLM summary prompt** improved: requests evidence-grounded output with Observed/Interpretation labels; says "Insufficient evidence" instead of generating a generic narrative.
+- **`_fallback_summary()`** is now honest: says "LLM summarization unavailable" with install instructions instead of a misleading narrative.
+- **CLI `analyze` output** improved: prints output file paths (JSON, Markdown) clearly; warns when no detections found; notes when captioning or summarization is disabled.
+- **`_cmd_gui()` and `_cmd_list_models()`** signature fixed: both now correctly accept the `args` parameter (was missing, would cause `TypeError` if called).
+- **Version bumped to 1.1.0**.
+
+### Fixed
+- `_cmd_gui(args)` and `_cmd_list_models(args)` were called with an argument but defined without one — fixed.
+- Stale remote branch `hardening/v0.2.0-modern-video-core` deleted (contained `Co-Authored-By: Claude Sonnet 4.6`; was the root cause of the GitHub Contributors sidebar issue).
+
+### Verified
+- GitHub Contributors API returns only `arashsajjadi`.
+- No Claude/Anthropic in any commit message on main (`git log --all --format='%B' | grep -i co-author` → empty).
+- No private media, model weights, or secrets committed.
+- 86 tests pass (77 existing + 9 new).
+
+---
+
 ## [1.0.1] — 2026-06-14
 
 ### Changed
