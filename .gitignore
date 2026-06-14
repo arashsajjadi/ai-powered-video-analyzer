@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.env
+.venv/
+venv/
+env/
+
+# Packaging
+*.whl
+*.tar.gz
+
+# Tests / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project-specific
+*.log
+report.txt
+report.json
+report.md
+*_analysis.json
+*_analysis.md
+*_annotated.mp4
+annotated_temp.mp4
+temp_audio.wav
+audio_for_video.wav
+temp_proc_audio.wav
+video_processing.log
+video_description.txt
+
+# Model weights (never commit these)
+models/
+*.pt
+*.pth
+*.onnx
+*.bin
+*.safetensors
+
+# Jupyter
+.ipynb_checkpoints/
