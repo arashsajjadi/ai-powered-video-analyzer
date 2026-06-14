@@ -1,31 +1,20 @@
-# pip_requirements.txt — Full local AI stack for ai-powered-video-analyzer v0.3.0
-# Install with: pip install -r pip_requirements.txt
+# pip_requirements.txt — Full local AI stack for ai-powered-video-analyzer v1.0
 #
-# For a minimal install without heavy models, use:
+# Recommended install (detection only):
+#   pip install -e ".[vision]"
+#
+# Full install (all pipeline components):
+#   pip install -r pip_requirements.txt
+#
+# Minimal install (no detection models):
 #   pip install -e .
-#
-# For the full stack (all pipeline components including VisionServeX):
-#   pip install -e ".[full]"
-#
-# For the legacy YOLO backend (not recommended since v0.3.0):
-#   pip install -e ".[legacy-yolo]"
 
-# Core
+# Core (always installed)
 numpy>=1.24,<3.0
 Pillow>=10.0
-tqdm>=4.65
-psutil>=5.9
-
-# Computer vision and video
 opencv-python-headless>=4.8
-moviepy>=1.0,<2.0
 
-# PyTorch (CPU wheels; GPU users should install from https://pytorch.org)
-torch>=2.0
-torchvision>=0.15
-torchaudio>=2.0
-
-# Object detection — primary backend (VisionServeX D-FINE / RF-DETR)
+# Object detection — VisionServeX (primary backend)
 visionservex>=3.11.0
 
 # Speech transcription
@@ -35,22 +24,23 @@ openai-whisper>=20231117
 transformers>=4.35
 accelerate>=0.24
 
-# Audio processing
+# PyTorch (install GPU version from https://pytorch.org for CUDA support)
+torch>=2.0
+torchvision>=0.15
+torchaudio>=2.0
+
+# Audio processing and events
 librosa>=0.10
 soundfile>=0.12
-
-# Audio event detection (PANNs)
 panns-inference>=0.1
+
+# Video I/O
+moviepy>=1.0,<2.0
 
 # LLM summarization (Ollama Python client)
 ollama>=0.3
 
-# Utilities
-requests>=2.31
-pyyaml>=6.0
-
-# Optional: Legacy YOLO backend (not recommended, install only if needed)
-# ultralytics>=8.0
-
-# Optional: OCR (uncomment if needed)
-# pytesseract>=0.3.10
+# Development
+pytest>=7.0
+pytest-cov>=4.0
+ruff>=0.4

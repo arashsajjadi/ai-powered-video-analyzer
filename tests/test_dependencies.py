@@ -2,39 +2,30 @@
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
 
 
 def test_pip_requirements_exists():
-    """pip_requirements.txt must exist (fixes issue #1)."""
+    """pip_requirements.txt must exist (fixes original issue #1)."""
     assert (ROOT / "pip_requirements.txt").exists(), "pip_requirements.txt is missing"
 
 
 def test_pip_requirements_is_valid_pip_format():
     """pip_requirements.txt must not contain conda export artifacts."""
     text = (ROOT / "pip_requirements.txt").read_text()
-    lines = [l.strip() for l in text.splitlines() if l.strip() and not l.startswith("#")]
+    lines = [ln.strip() for ln in text.splitlines() if ln.strip() and not ln.startswith("#")]
     for line in lines:
-        # Conda export artifacts look like: "package  0.0  pypi_0  pypi"
-        assert "pypi_0" not in line, f"Invalid conda-export artifact in pip_requirements.txt: {line!r}"
-        assert "pypi    pypi" not in line, f"Invalid conda-export artifact in pip_requirements.txt: {line!r}"
+        assert "pypi_0" not in line, f"Invalid conda-export artifact: {line!r}"
+        assert "pypi    pypi" not in line, f"Invalid conda-export artifact: {line!r}"
 
 
-def test_environment_yml_exists():
-    """environment.yml must exist with valid conda format."""
-    assert (ROOT / "environment.yml").exists(), "environment.yml is missing"
-
-
-def test_environment_yml_is_valid():
-    """environment.yml must not contain conda-export build strings."""
-    import yaml  # type: ignore[import]
-    text = (ROOT / "environment.yml").read_text()
-    env = yaml.safe_load(text)
-    assert "name" in env, "environment.yml must have a 'name' field"
-    assert "dependencies" in env, "environment.yml must have a 'dependencies' field"
+def test_no_broken_conda_requirements():
+    """conda_requirements.txt (the broken Windows conda dump from issue #1) must not be tracked."""
+    assert not (ROOT / "conda_requirements.txt").exists(), (
+        "conda_requirements.txt still exists — remove it with: git rm conda_requirements.txt"
+    )
 
 
 def test_pyproject_toml_exists():
@@ -43,19 +34,50 @@ def test_pyproject_toml_exists():
 
 def test_pyproject_toml_valid():
     try:
-        import tomllib  # Python 3.11+
+        import tomllib
     except ImportError:
         import tomli as tomllib  # type: ignore[no-redef]
 
-    text = (ROOT / "pyproject.toml").read_bytes()
-    data = tomllib.loads(text.decode())
+    data = tomllib.loads((ROOT / "pyproject.toml").read_bytes().decode())
     assert "project" in data
     assert data["project"]["name"] == "ai-powered-video-analyzer"
-    assert "0.3.0" in data["project"]["version"]
+    assert data["project"]["version"] == "1.0.0"
+
+
+def test_pyproject_has_vision_extra():
+    """[vision] extra must exist and include visionservex."""
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib  # type: ignore[no-redef]
+
+    data = tomllib.loads((ROOT / "pyproject.toml").read_bytes().decode())
+    extras = data["project"]["optional-dependencies"]
+    assert "vision" in extras, "Missing [vision] extra in pyproject.toml"
+    assert any("visionservex" in dep for dep in extras["vision"]), (
+        "[vision] extra must contain visionservex"
+    )
+
+
+def test_pyproject_ultralytics_not_in_base_or_vision():
+    """Ultralytics must not be a base or vision dependency (not the default backend)."""
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib  # type: ignore[no-redef]
+
+    data = tomllib.loads((ROOT / "pyproject.toml").read_bytes().decode())
+    base = data["project"].get("dependencies", [])
+    vision = data["project"].get("optional-dependencies", {}).get("vision", [])
+    for dep_list, name in [(base, "base"), (vision, "[vision]")]:
+        for dep in dep_list:
+            assert "ultralytics" not in dep.lower(), (
+                f"ultralytics must not be in {name} dependencies (it is legacy)"
+            )
 
 
 def test_video_processing_py_exists():
-    """video_processing.py must exist (fixes issue #1 — CLI script was missing)."""
+    """video_processing.py must exist (CLI compatibility shim from issue #1)."""
     assert (ROOT / "video_processing.py").exists(), "video_processing.py is missing"
 
 
@@ -69,21 +91,29 @@ def test_changelog_exists():
 
 
 def test_readme_references_existing_files():
-    """
-    README must not reference files that don't exist.
-    (This is what caused issue #1.)
-    """
+    """README must not reference files that don't exist (reproduces original issue #1)."""
     readme = (ROOT / "README.md").read_text()
-    # These files must exist if README references them
-    file_refs = {
+    must_exist = {
         "pip_requirements.txt": ROOT / "pip_requirements.txt",
         "video_processing.py": ROOT / "video_processing.py",
         "video_processing_gui.py": ROOT / "video_processing_gui.py",
-        "environment.yml": ROOT / "environment.yml",
     }
-    for ref, path in file_refs.items():
+    for ref, path in must_exist.items():
         if ref in readme:
-            assert path.exists(), (
-                f"README references '{ref}' but the file does not exist. "
-                f"This reproduces issue #1."
-            )
+            assert path.exists(), f"README references '{ref}' but it does not exist"
+
+
+def test_author_is_arash():
+    """Package author must be Arash Sajjadi, not an AI assistant."""
+    try:
+        import tomllib
+    except ImportError:
+        import tomli as tomllib  # type: ignore[no-redef]
+
+    data = tomllib.loads((ROOT / "pyproject.toml").read_bytes().decode())
+    authors = data["project"].get("authors", [])
+    names = [a.get("name", "") for a in authors]
+    assert any("Arash" in n for n in names), f"Author must be Arash Sajjadi, got: {names}"
+    assert not any("Claude" in n or "Anthropic" in n for n in names), (
+        "Claude/Anthropic must not be listed as an author"
+    )
