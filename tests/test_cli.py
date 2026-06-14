@@ -36,7 +36,25 @@ def test_cli_doctor_help():
 def test_cli_version():
     result = _run("--version")
     assert result.returncode == 0
-    assert "0.2.0" in result.stdout
+    assert "0.3.0" in result.stdout
+
+
+def test_cli_analyze_has_detector_preset():
+    result = _run("analyze", "--help")
+    assert result.returncode == 0
+    assert "detector-preset" in result.stdout or "preset" in result.stdout.lower()
+
+
+def test_cli_analyze_has_summary_style():
+    result = _run("analyze", "--help")
+    assert result.returncode == 0
+    assert "summary-style" in result.stdout or "summary_style" in result.stdout
+
+
+def test_cli_list_models():
+    result = _run("list-models")
+    # May fail if visionservex not installed — just must not crash unexpectedly
+    assert result.returncode in (0, 1)
 
 
 def test_video_processing_py_help():

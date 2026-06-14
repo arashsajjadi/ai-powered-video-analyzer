@@ -4,12 +4,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ai-powered-video-analyzer"
-version = "0.2.0"
-description = "Offline, privacy-first AI video understanding: detection, captioning, transcription, and LLM summarization."
+version = "0.3.0"
+description = "Offline, privacy-first AI video understanding: VisionServeX detection, captioning, transcription, and LLM summarization."
 readme = "README.md"
 license = {text = "MIT"}
 authors = [{name = "Arash Sajjadi", email = "arash.sajjadi@usask.ca"}]
-keywords = ["video", "ai", "computer-vision", "offline", "privacy", "yolo", "whisper", "blip"]
+keywords = ["video", "ai", "computer-vision", "offline", "privacy", "visionservex", "dfine", "whisper", "blip"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
@@ -32,10 +32,11 @@ dependencies = [
 
 [project.optional-dependencies]
 # Full local AI stack (all pipeline components)
+# Primary detection backend: VisionServeX (D-FINE / RF-DETR families)
 full = [
     "torch>=2.0",
     "opencv-python-headless>=4.8",
-    "ultralytics>=8.0",
+    "visionservex>=3.11.0",
     "openai-whisper>=20231117",
     "transformers>=4.35",
     "librosa>=0.10",
@@ -51,9 +52,9 @@ gui = [
     "opencv-python>=4.8",
 ]
 
-# Optional VisionServeX detection backend
-visionservex = [
-    "visionservex>=3.11.0",
+# Legacy YOLO backend (not the default since v0.3.0 — use VisionServeX instead)
+legacy-yolo = [
+    "ultralytics>=8.0",
 ]
 
 # Development and testing

@@ -30,9 +30,15 @@ def main() -> int:
     )
     parser.add_argument(
         "--backend",
-        choices=["auto", "yolo", "visionservex", "none"],
-        default="auto",
-        help="Object detection backend (default: auto).",
+        choices=["auto", "visionservex", "none", "legacy_yolo"],
+        default="visionservex",
+        help="Object detection backend (default: visionservex).",
+    )
+    parser.add_argument(
+        "--detector-preset",
+        choices=["fast", "balanced", "quality", "quality+"],
+        default="balanced",
+        help="Detector preset (default: balanced = dfine-s).",
     )
     parser.add_argument(
         "--strategy",
@@ -42,7 +48,7 @@ def main() -> int:
     )
     parser.add_argument("--target-fps", type=float, default=1.0)
     parser.add_argument("--whisper-model", default="base")
-    parser.add_argument("--ollama-model", default="phi4:latest")
+    parser.add_argument("--ollama-model", default="")
     parser.add_argument("--output-dir", default=".")
     parser.add_argument("--language", default=None)
     parser.add_argument("--no-captioning", action="store_true")
@@ -65,6 +71,7 @@ def main() -> int:
         frame_strategy=args.strategy,
         target_fps=args.target_fps,
         backend=args.backend,
+        detector_preset=args.detector_preset,
         whisper_model=args.whisper_model,
         ollama_model=args.ollama_model,
         device=args.device,

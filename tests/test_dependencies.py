@@ -51,7 +51,7 @@ def test_pyproject_toml_valid():
     data = tomllib.loads(text.decode())
     assert "project" in data
     assert data["project"]["name"] == "ai-powered-video-analyzer"
-    assert "0.2.0" in data["project"]["version"]
+    assert "0.3.0" in data["project"]["version"]
 
 
 def test_video_processing_py_exists():

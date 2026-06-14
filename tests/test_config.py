@@ -8,8 +8,15 @@ def test_default_config_is_valid():
     c = AnalysisConfig()
     assert c.frame_strategy == "adaptive"
     assert c.target_fps == 1.0
-    assert c.backend == "auto"
+    assert c.backend == "visionservex"  # primary backend since v0.3.0
     assert c.device == "auto"
+
+
+def test_default_preset_and_style():
+    from ai_powered_video_analyzer.config import AnalysisConfig
+    c = AnalysisConfig()
+    assert c.detector_preset == "balanced"
+    assert c.summary_style == "concise"
 
 
 def test_pann_path_defaults_to_string():

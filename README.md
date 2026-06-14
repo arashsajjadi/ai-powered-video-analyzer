@@ -13,12 +13,32 @@ Analyze local video files using a fully offline AI pipeline: object detection, s
 
 | Capability | Model | Notes |
 |---|---|---|
-| Object detection | YOLO (ultralytics) or VisionServeX | Configurable backend |
-| Scene captioning | BLIP (Salesforce) | Generates natural-language frame descriptions |
+| Object detection | VisionServeX D-FINE (dfine-s default) | Primary backend since v0.3.0 — real-video benchmarked |
+| Scene captioning | BLIP (Salesforce) | Natural-language frame descriptions |
 | Speech transcription | Whisper (OpenAI) | Multilingual, local |
 | Audio event detection | PANNs (CNN14) | Requires CNN14 checkpoint |
 | LLM summarization | Any Ollama model | Runs fully offline |
 | Adaptive sampling | Built-in | Scene-change and motion-aware frame selection |
+
+---
+
+## Why VisionServeX D-FINE (since v0.3.0)
+
+The default detection backend is now VisionServeX with D-FINE transformer models rather than Ultralytics YOLO. This change is backed by real-video benchmarks run on RTX 5080:
+
+| Preset   | Model    | ms/frame | Use case |
+|----------|----------|----------|----------|
+| fast     | dfine-n  | ~18–21   | Speed-critical pipelines |
+| balanced | dfine-s  | ~15–19   | **Default** — best accuracy/speed balance |
+| quality  | dfine-m  | ~16–21   | Highest COCO accuracy |
+| quality+ | dfine-l  | higher   | Large model, maximum accuracy |
+
+Key findings from benchmarks (see `reports/benchmarks/v0.3.0/`):
+- All D-FINE presets correctly identify COCO-class subjects (dog detection: max confidence 0.87–0.93).
+- rfdetr-nano was evaluated and rejected — it hallucinated bicycle/sheep/horse on a dog video.
+- **Limitation**: COCO-80 classes do not include fire or smoke. Detection of abstract/environmental categories requires the BLIP captioning stage.
+
+Ultralytics/YOLO is still accessible via `--backend legacy_yolo` but is not part of the default pipeline.
 
 ---
 
@@ -36,13 +56,16 @@ All inference runs on your local machine. No frames, audio, or text leave your c
 # Minimal install (no heavy models)
 pip install -e .
 
-# Full local AI stack (all pipeline components)
+# Full local AI stack — VisionServeX D-FINE + Whisper + BLIP + PANNs + Ollama
 pip install -r pip_requirements.txt
 
 # Or use extras
-pip install -e ".[full]"           # Full local stack
-pip install -e ".[full,gui]"       # Full stack + GUI dependencies
-pip install -e ".[dev]"            # Add test/lint tools
+pip install -e ".[full]"       # Full stack (VisionServeX is included)
+pip install -e ".[full,gui]"   # Full stack + GUI dependencies
+pip install -e ".[dev]"        # Add test/lint tools
+
+# Legacy YOLO backend (not recommended, not installed by default since v0.3.0)
+pip install -e ".[legacy-yolo]"
 ```
 
 ### Option 2 — Conda
@@ -50,14 +73,6 @@ pip install -e ".[dev]"            # Add test/lint tools
 ```bash
 conda env create -f environment.yml
 conda activate ai-video-analyzer
-```
-
-### Option 3 — VisionServeX optional backend
-
-```bash
-# Install base package first, then add VisionServeX
-pip install -e ".[full]"
-pip install "visionservex[hf,rfdetr]"
 ```
 
 ---
@@ -74,7 +89,7 @@ curl -fsSL https://ollama.com/install.sh | sh
 ollama pull phi4:latest
 # Other good options:
 ollama pull qwen:14b
-ollama pull partai/dorna-llama3:latest
+ollama pull llama3
 ```
 
 ### ffmpeg (audio extraction)
@@ -93,9 +108,9 @@ brew install ffmpeg
 
 | Model | Command | Where |
 |---|---|---|
+| D-FINE / RF-DETR | Auto-downloaded by VisionServeX on first use | `~/.cache/visionservex/` |
 | Whisper | Auto-downloaded on first use | `~/.cache/whisper/` |
 | BLIP | Auto-downloaded on first use | `~/.cache/huggingface/` |
-| YOLO | Auto-downloaded on first use | `~/.ultralytics/` |
 | PANNs CNN14 | Manual download required | See below |
 
 ### PANNs CNN14 checkpoint
@@ -108,10 +123,6 @@ mkdir -p models
 models/cnn14.pth
 ```
 
-### Windows — Tesseract OCR (optional)
-
-Install from [UB-Mannheim Tesseract](https://github.com/UB-Mannheim/tesseract/wiki). OCR is used in some modes for text extraction.
-
 ---
 
 ## Usage
@@ -119,32 +130,44 @@ Install from [UB-Mannheim Tesseract](https://github.com/UB-Mannheim/tesseract/wi
 ### CLI
 
 ```bash
-# Basic analysis
+# Basic analysis (VisionServeX dfine-s, adaptive sampling)
 ai-video-analyzer analyze /path/to/video.mp4
 
-# With options
-ai-video-analyzer analyze /path/to/video.mp4 \
-    --strategy adaptive \
-    --target-fps 1.0 \
-    --backend auto \
-    --whisper-model base \
-    --ollama-model phi4:latest \
-    --output-dir ./results
+# Choose a detector preset
+ai-video-analyzer analyze video.mp4 --detector-preset fast        # dfine-n, ~18ms/frame
+ai-video-analyzer analyze video.mp4 --detector-preset balanced    # dfine-s (default)
+ai-video-analyzer analyze video.mp4 --detector-preset quality     # dfine-m
+ai-video-analyzer analyze video.mp4 --detector-preset quality+    # dfine-l
 
-# Compatibility shim (matches the README's original example)
-python video_processing.py --video /path/to/video.mp4 --save
+# Choose a summary style
+ai-video-analyzer analyze video.mp4 --summary-style concise      # one paragraph (default)
+ai-video-analyzer analyze video.mp4 --summary-style evidence     # grounded in detected objects
+ai-video-analyzer analyze video.mp4 --summary-style technical    # model names and confidence scores
+ai-video-analyzer analyze video.mp4 --summary-style narrative    # story-form prose
 
-# Use the VisionServeX backend
-ai-video-analyzer analyze video.mp4 --backend visionservex --detector-model rf-detr-base
+# List available Ollama models
+ai-video-analyzer analyze video.mp4 --list-ollama-models
+
+# List available VisionServeX detection models
+ai-video-analyzer list-models
+
+# Explicit model ID (overrides preset)
+ai-video-analyzer analyze video.mp4 --detector-model dfine-x
 
 # Skip heavy models for a quick structural test
 ai-video-analyzer analyze video.mp4 --no-captioning --no-audio-events --no-summarization --backend none
 
+# Compatibility shim (matches the original README example)
+python video_processing.py --video /path/to/video.mp4 --save
+
 # Check your environment
 ai-video-analyzer doctor
 
-# Benchmark frame sampling and detection
-ai-video-analyzer benchmark video.mp4 --strategy adaptive
+# Benchmark detection speed and frame sampling
+ai-video-analyzer benchmark video.mp4 --compare-detectors
+
+# Evaluate all detector presets on a video
+ai-video-analyzer eval-backends video.mp4 --output-dir reports/benchmarks/
 ```
 
 ### GUI
@@ -157,13 +180,6 @@ python video_processing_gui.py
 ai-video-analyzer gui
 ```
 
-The GUI lets you:
-- Load a video file
-- Choose transcription language
-- Pick an Ollama model from a live list
-- Configure frame sampling rate
-- Start processing and view results
-
 ### Python API
 
 ```python
@@ -174,38 +190,17 @@ config = AnalysisConfig(
     video_path="my_video.mp4",
     frame_strategy="adaptive",
     target_fps=1.0,
-    backend="auto",          # "auto" | "yolo" | "visionservex" | "none"
+    backend="visionservex",         # primary backend since v0.3.0
+    detector_preset="balanced",     # fast | balanced | quality | quality+
     whisper_model="base",
-    ollama_model="phi4:latest",
+    ollama_model="",                # auto-discovered from local Ollama
+    summary_style="concise",        # concise | evidence | technical | narrative
     output_dir="./results",
 )
 
 report = analyze_video(config)
 print(report.summary)
 print(report.to_json())
-```
-
-### VisionServeX Backend
-
-If VisionServeX is installed, it can be used as a drop-in replacement for the YOLO backend:
-
-```python
-config = AnalysisConfig(
-    video_path="video.mp4",
-    backend="visionservex",
-    detector_model="rf-detr-base",   # or any model in your VisionServeX registry
-)
-```
-
-```bash
-ai-video-analyzer analyze video.mp4 --backend visionservex --detector-model rf-detr-base
-```
-
-If VisionServeX is not installed, you will see a helpful error:
-
-```
-ImportError: VisionServeX backend requested but not installed.
-Install with: pip install 'visionservex[hf,rfdetr]'
 ```
 
 ---
@@ -229,6 +224,12 @@ ai-video-analyzer analyze video.mp4 --strategy adaptive --target-fps 2.0
 # Force uniform 1fps (like the original behavior)
 ai-video-analyzer analyze video.mp4 --strategy uniform --target-fps 1.0
 ```
+
+---
+
+## Known Limitations
+
+**Fire, smoke, and environmental phenomena** are not COCO-80 classes. D-FINE and all other COCO-trained detectors will misidentify these as the closest COCO category (food items like cake or pizza at similar color/texture). The BLIP captioning stage handles these cases via natural-language descriptions. A future update may add an open-vocabulary detector preset.
 
 ---
 
@@ -275,6 +276,8 @@ Download `cnn14.pth` from [github.com/qiuqiangkong/audioset_tagging_cnn](https:/
 ### `VisionServeX not installed`
 ```bash
 pip install "visionservex[hf,rfdetr]"
+# Or with the full stack:
+pip install -e ".[full]"
 ```
 
 ### GPU not detected
@@ -318,7 +321,7 @@ Video file
     ├─ Frame sampling (adaptive / scene-change / motion-aware)
     │       └─ FrameRecord list (frame, timestamp, reason)
     │
-    ├─ Object detection  → detections per frame
+    ├─ Object detection  → VisionServeX D-FINE detections per frame
     ├─ Image captioning  → BLIP captions per frame
     │
     ├─ Audio extraction
@@ -352,21 +355,25 @@ MIT License — see [LICENSE](LICENSE).
 
 ## Acknowledgments
 
-- [Ultralytics](https://github.com/ultralytics/ultralytics) — YOLO
+- [VisionServeX](https://github.com/arashsajjadi/VisionServeX) — local-first CV model gateway (primary detection backend since v0.3.0)
+- [D-FINE](https://github.com/Peterande/D-FINE) — Fine-grained Distribution Refined DETR (primary detector models)
 - [OpenAI Whisper](https://github.com/openai/whisper) — Speech transcription
 - [Salesforce BLIP](https://github.com/salesforce/BLIP) — Image captioning
 - [PANNs](https://github.com/qiuqiangkong/audioset_tagging_cnn) — Audio event detection
 - [Ollama](https://ollama.com) — Local LLM inference
+- [Ultralytics](https://github.com/ultralytics/ultralytics) — YOLO (available via `--backend legacy_yolo`)
 - **Dr. Mark Eramian** and the **Image Lab, Department of Computer Science, University of Saskatchewan** — mentorship and research guidance.
 
 ---
 
 ## References
 
-- **YOLO (YOLOv11)**: Khanam, R., & Hussain, M. (2024). [arXiv:2410.17725](https://arxiv.org/abs/2410.17725)
+- **D-FINE**: Peng, Y., et al. (2024). D-FINE: Redefine Regression Task of DETRs as Fine-grained Distribution Refinement. [arXiv:2410.13842](https://arxiv.org/abs/2410.13842)
+- **RF-DETR**: Roboflow Research (2024). [github.com/roboflow/RF-DETR](https://github.com/roboflow/RF-DETR)
 - **Whisper**: Radford, A., et al. (2022). [arXiv:2212.04356](https://arxiv.org/abs/2212.04356)
 - **BLIP**: Li, J., et al. (2022). [arXiv:2201.12086](https://arxiv.org/abs/2201.12086)
 - **PANNs**: Kong, Q., et al. (2020). IEEE/ACM TASLP.
+- **YOLO (YOLOv11)**: Khanam, R., & Hussain, M. (2024). [arXiv:2410.17725](https://arxiv.org/abs/2410.17725)
 
 ---
 

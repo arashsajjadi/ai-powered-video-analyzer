@@ -7,6 +7,45 @@ This project uses [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.3.0] — 2026-06-14
+
+### Changed (Breaking)
+- **VisionServeX D-FINE is now the primary detection backend.** `AnalysisConfig.backend` default changed from `"auto"` to `"visionservex"`. `--backend` CLI default changed from `"auto"` to `"visionservex"`.
+- **Ultralytics/YOLO removed from the default pipeline.** YOLO is no longer auto-selected, no longer a dependency in `[full]` or `pip_requirements.txt`. Use `--backend legacy_yolo` or install `.[legacy-yolo]` if needed.
+- **Backend auto-selection** now falls back to Null (no detection) instead of YOLO when VisionServeX is unavailable.
+- `pyproject.toml` `[full]` extra: removed `ultralytics`, added `visionservex>=3.11.0`. New `[legacy-yolo]` extra for backward compatibility.
+
+### Added
+- **Detector presets** (`--detector-preset`): `fast` → dfine-n, `balanced` → dfine-s (default), `quality` → dfine-m, `quality+` → dfine-l.
+- **Summary styles** (`--summary-style`): `concise` (default), `evidence`, `technical`, `narrative`.
+- **`--list-ollama-models`** flag on the `analyze` subcommand.
+- **`list-models` subcommand** — shows all VisionServeX presets and registry entries.
+- **`eval-backends` subcommand** — benchmarks fast/balanced/quality presets on a video and writes JSON results.
+- **Ollama auto-discovery** — `AnalysisConfig.ollama_model` auto-populated from `ollama list` output (prefers phi4, qwen, llama3).
+- **`resolve_model_id(model_id, preset)`** — exported helper from `visionservex_backend.py`.
+- **`list_available_detect_models()`** — queries VisionServeX registry for wired detection models.
+- **`PRESET_MODELS`** — exported from `backends/__init__.py` for CLI and documentation.
+- **`--compare-detectors`** flag on the `benchmark` subcommand.
+- **`reports/benchmarks/v0.3.0/`** — real-video benchmark results on RTX 5080 (dog, fire, Niagara Falls videos).
+- **Doctor command** — VisionServeX is now a required check; D-FINE registry probe added; ultralytics check moved to optional/legacy.
+
+### Evidence (benchmarks on RTX 5080, 2026-06-14)
+- dfine-s (balanced): dog detection max score 0.87, 18.6ms/frame, 30 frames.
+- dfine-m (quality): dog detection max score 0.93, 21.0ms/frame, 30 frames.
+- dfine-n (fast): dog detection max score 0.90, 21.2ms/frame, 30 frames.
+- rfdetr-nano evaluated and rejected: hallucinated bicycle/sheep/horse on dog video.
+- Fire/smoke video: no COCO-80 fire class; food misclassification is expected and documented.
+- Private fall/smoke video: completed, runtime=0.9s, no media committed.
+
+### Fixed
+- `YOLOBackend` renamed to `LegacyYOLOBackend`; `yolo_backend.py` renamed to `legacy_yolo_backend.py`.
+- `test_config.py`: updated `backend == "auto"` assertion to `"visionservex"`.
+- `test_dependencies.py`: updated version assertion to `"0.3.0"`.
+- `test_backends.py`: fixed `b._parse_result()` → `_parse_detections()` (module-level function).
+- `core.py`: `load_backend()` call now passes `preset=config.detector_preset`.
+
+---
+
 ## [0.2.0] — 2026-06-14
 
 ### Fixed (Issue #1)
