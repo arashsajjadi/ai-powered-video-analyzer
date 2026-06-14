@@ -58,7 +58,12 @@ def analyze_video(config: AnalysisConfig) -> AnalysisReport:
 
     # --- Detection backend ---
     from ai_powered_video_analyzer.backends import load_backend
-    backend = load_backend(config.backend, config.detector_model, config.device)
+    backend = load_backend(
+        config.backend,
+        model_id=config.detector_model,
+        preset=config.detector_preset,
+        device=config.device,
+    )
     if isinstance(backend, type) or not hasattr(backend, 'predict'):
         limitations.append("Object detection unavailable (no backend loaded).")
 

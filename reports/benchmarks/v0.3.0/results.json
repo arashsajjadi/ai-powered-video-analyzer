@@ -1,0 +1,140 @@
+[
+  {
+    "video": "dog",
+    "preset": "fast",
+    "model": "dfine-n",
+    "frames": 30,
+    "total_dets": 172,
+    "avg_ms_per_frame": 21.2,
+    "top_labels": {
+      "dog": 40,
+      "cat": 34,
+      "bird": 29,
+      "person": 19,
+      "bed": 17
+    }
+  },
+  {
+    "video": "dog",
+    "preset": "balanced",
+    "model": "dfine-s",
+    "frames": 30,
+    "total_dets": 180,
+    "avg_ms_per_frame": 18.6,
+    "top_labels": {
+      "dog": 49,
+      "person": 39,
+      "cat": 37,
+      "bird": 18,
+      "bed": 17
+    }
+  },
+  {
+    "video": "dog",
+    "preset": "quality",
+    "model": "dfine-m",
+    "frames": 30,
+    "total_dets": 160,
+    "avg_ms_per_frame": 21.0,
+    "top_labels": {
+      "dog": 43,
+      "person": 39,
+      "cat": 28,
+      "bed": 11,
+      "sofa": 10
+    }
+  },
+  {
+    "video": "fire",
+    "preset": "fast",
+    "model": "dfine-n",
+    "frames": 30,
+    "total_dets": 157,
+    "avg_ms_per_frame": 18.1,
+    "top_labels": {
+      "cake": 46,
+      "bird": 26,
+      "pizza": 22,
+      "person": 21,
+      "sandwich": 11
+    }
+  },
+  {
+    "video": "fire",
+    "preset": "balanced",
+    "model": "dfine-s",
+    "frames": 30,
+    "total_dets": 234,
+    "avg_ms_per_frame": 19.0,
+    "top_labels": {
+      "person": 95,
+      "cake": 53,
+      "sandwich": 15,
+      "bird": 14,
+      "pizza": 13
+    }
+  },
+  {
+    "video": "fire",
+    "preset": "quality",
+    "model": "dfine-m",
+    "frames": 30,
+    "total_dets": 194,
+    "avg_ms_per_frame": 20.8,
+    "top_labels": {
+      "cake": 123,
+      "broccoli": 40,
+      "sandwich": 14,
+      "pizza": 8,
+      "diningtable": 3
+    }
+  },
+  {
+    "video": "niagara",
+    "preset": "fast",
+    "model": "dfine-n",
+    "frames": 30,
+    "total_dets": 28,
+    "avg_ms_per_frame": 13.3,
+    "top_labels": {
+      "person": 15,
+      "cell phone": 9,
+      "bird": 3,
+      "backpack": 1
+    }
+  },
+  {
+    "video": "niagara",
+    "preset": "balanced",
+    "model": "dfine-s",
+    "frames": 30,
+    "total_dets": 35,
+    "avg_ms_per_frame": 14.3,
+    "top_labels": {
+      "person": 23,
+      "cell phone": 9,
+      "handbag": 1,
+      "backpack": 1,
+      "remote": 1
+    }
+  },
+  {
+    "video": "niagara",
+    "preset": "quality",
+    "model": "dfine-m",
+    "frames": 30,
+    "total_dets": 36,
+    "avg_ms_per_frame": 15.9,
+    "top_labels": {
+      "person": 19,
+      "cell phone": 12,
+      "sheep": 3,
+      "bird": 2
+    }
+  },
+  {
+    "video": "private_fall_smoke",
+    "status": "completed",
+    "runtime_sec": 0.9
+  }
+]
