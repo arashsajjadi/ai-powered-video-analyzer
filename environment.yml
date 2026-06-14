@@ -1,0 +1,48 @@
+# environment.yml — Conda environment for ai-powered-video-analyzer
+#
+# Create and activate:
+#   conda env create -f environment.yml
+#   conda activate ai-video-analyzer
+#
+# This file uses valid conda environment format (NOT a conda export dump).
+
+name: ai-video-analyzer
+
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.12
+  - numpy>=1.24
+  - pillow>=10.0
+  - tqdm>=4.65
+  - psutil>=5.9
+  - pyyaml>=6.0
+  - requests>=2.31
+  # Computer vision
+  - opencv>=4.8
+  # Audio processing
+  - librosa>=0.10
+  - soundfile>=0.12
+  # PyTorch (with CUDA 11.8 — adjust for your GPU)
+  - pytorch>=2.0
+  - torchvision>=0.15
+  - torchaudio>=2.0
+  - pytorch-cuda=11.8
+  # Video
+  - moviepy>=1.0
+  # pip-only packages (no conda equivalents)
+  - pip
+  - pip:
+    - ultralytics>=8.0
+    - openai-whisper>=20231117
+    - transformers>=4.35
+    - accelerate>=0.24
+    - panns-inference>=0.1
+    - ollama>=0.3
+    # Optional: VisionServeX backend
+    # - visionservex>=3.11.0
+    # Optional: OCR
+    # - pytesseract>=0.3.10

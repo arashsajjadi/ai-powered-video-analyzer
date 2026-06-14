@@ -1,0 +1,83 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-powered-video-analyzer"
+version = "0.2.0"
+description = "Offline, privacy-first AI video understanding: detection, captioning, transcription, and LLM summarization."
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Arash Sajjadi", email = "arash.sajjadi@usask.ca"}]
+keywords = ["video", "ai", "computer-vision", "offline", "privacy", "yolo", "whisper", "blip"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+requires-python = ">=3.10"
+
+# Minimal core — installs without heavy models
+dependencies = [
+    "numpy>=1.24",
+    "Pillow>=10.0",
+    "tqdm>=4.65",
+    "psutil>=5.9",
+]
+
+[project.optional-dependencies]
+# Full local AI stack (all pipeline components)
+full = [
+    "torch>=2.0",
+    "opencv-python-headless>=4.8",
+    "ultralytics>=8.0",
+    "openai-whisper>=20231117",
+    "transformers>=4.35",
+    "librosa>=0.10",
+    "soundfile>=0.12",
+    "moviepy>=1.0",
+    "panns-inference>=0.1",
+    "ollama>=0.3",
+]
+
+# GUI support
+gui = [
+    "ai-powered-video-analyzer[full]",
+    "opencv-python>=4.8",
+]
+
+# Optional VisionServeX detection backend
+visionservex = [
+    "visionservex>=3.11.0",
+]
+
+# Development and testing
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.4",
+]
+
+[project.scripts]
+ai-video-analyzer = "ai_powered_video_analyzer.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/arashsajjadi/ai-powered-video-analyzer"
+Issues = "https://github.com/arashsajjadi/ai-powered-video-analyzer/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ai_powered_video_analyzer*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
